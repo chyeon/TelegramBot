@@ -15,6 +15,10 @@ public class TelegramMessageTest {
 	
 	@Test
 	public void sendMessageTest() {
-		bot.sendMessage("Hi, test");
+		bot.sendMessage("Hi, sendMessageTest");
+	}
+	@Test
+	public void sendMessageWithURLTest() {
+		bot.sendMessageWithURL("Hi, sendMessageWithURLTest");
 	}
 }

@@ -1,11 +1,21 @@
 package com.example.bot;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.Builder;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -39,6 +49,38 @@ public class TelegramMessageBot extends TelegramLongPollingBot {
 		} catch (TelegramApiException e) {
 			log.debug(e.getMessage());
 		}
+	}
+
+	@Data
+	public class Message {
+		private String chat_id;
+		private String text;
+
+		Message(String chat_id, String text) {
+			this.chat_id = chat_id;
+			this.text = text;
+		}
+	}
+	
+
+	public void sendMessageWithURL(String content) {
+		String url = "https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage";
+		Message message = new Message(CHAT_ID, content);
+		
+		try {
+			String param = new ObjectMapper().writeValueAsString(message);
+			
+			HttpHeaders headers = new HttpHeaders(); 
+			headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+				
+			HttpEntity<String> entity = new HttpEntity<>(param, headers);
+			ResponseEntity<String> response = new RestTemplate().postForEntity(url, entity, String.class);
+			System.out.println(response.getBody());
+
+		}catch (Exception e) {
+			log.error("Unhandled exception occurred while send Telegram.", e);
+		}
+
 	}
 
 }
