@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -37,7 +38,22 @@ public class TelegramMessageBot extends TelegramLongPollingBot {
 
 	@Override // Bot이 메세지를 받았을 때 처리하는 메서드
 	public void onUpdateReceived(Update update) {
-		// TODO
+		if(update.hasMessage() && update.getMessage().hasText()){
+			log.info(update.getMessage().toString());
+
+			String username = update.getMessage().getChat().getUserName();
+			String chat_id = update.getMessage().getChatId().toString();
+			String text = "Hi, you are @"+username;
+
+			SendMessage sendMessage = SendMessage.builder().chatId(chat_id).text(text).build();
+			try {
+				execute(sendMessage);
+			} catch (TelegramApiException e) {
+				e.printStackTrace();
+			}
+
+		}
+
 	}
 
 	// Bot으로 메세지를 보내는 커스텀 메서드
@@ -52,11 +68,11 @@ public class TelegramMessageBot extends TelegramLongPollingBot {
 	}
 
 	@Data
-	public class Message {
+	public class myMessage {
 		private String chat_id;
 		private String text;
 
-		Message(String chat_id, String text) {
+		myMessage(String chat_id, String text) {
 			this.chat_id = chat_id;
 			this.text = text;
 		}
@@ -65,7 +81,7 @@ public class TelegramMessageBot extends TelegramLongPollingBot {
 
 	public void sendMessageWithURL(String content) {
 		String url = "https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage";
-		Message message = new Message(CHAT_ID, content);
+		myMessage message = new myMessage(CHAT_ID, content);
 		
 		try {
 			String param = new ObjectMapper().writeValueAsString(message);
